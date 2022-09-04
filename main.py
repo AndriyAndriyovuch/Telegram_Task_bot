@@ -2,7 +2,7 @@ import json
 import datetime
 
 from reportlab import xrange
-from telebot import TeleBot
+from telebot import TeleBot, types
 from data.main_data import token
 
 bot = TeleBot(token)
@@ -12,7 +12,19 @@ COMMANDS = ['/start', '/add', '/current', '/long', '/all', '/delete']
 
 @bot.message_handler(commands=['start'])
 def send_message(message):
-    bot.send_message(chat_id=message.chat.id, text=f'This is the list of commands: {COMMANDS}')
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    add = types.KeyboardButton('/add')
+    current = types.KeyboardButton('/current')
+    long = types.KeyboardButton('/long')
+    all = types.KeyboardButton('/all')
+    delete = types.KeyboardButton('/delete')
+    markup.add(add, current, long, all, delete)
+    bot.send_message(chat_id=message.chat.id, text=f'This is the list of commands: \n'
+                                                   f'/add - Add a task\n'
+                                                   f'/current - List of current tasks\n'
+                                                   f'/long - List of long range tasks\n'
+                                                   f'/all - List of all tasks\n'
+                                                   f'/delete - Delete task', reply_markup=markup)
 
 
 @bot.message_handler(commands=['add'])
@@ -76,6 +88,7 @@ def show_current_tasks(message):
 
             result = f"Name: {data['Name']}\n" \
                      f"Deadline: {view_date}\n" \
+                     f"Status: current task\n" \
                      f"id: {data['id']}\n"
             bot.send_message(message.chat.id, text=result)
 
@@ -92,31 +105,19 @@ def show_long_tasks(message):
 
             result = f"Name: {data['Name']}\n" \
                      f"Deadline: {view_date}\n" \
+                     f"Status: long range task\n" \
                      f"id: {data['id']}\n"
             bot.send_message(message.chat.id, text=result)
 
 
 @bot.message_handler(commands=['all'])
-def show_long_tasks(message):
-    with open('data/current_tasks.json', 'r') as current_file:
-        current_data = json.load(current_file)
+def show_all_tasks(message):
+    bot.send_message(message.chat.id, text='###### CURRENT TASKS ######')
+    show_current_tasks(message)
 
-        for data in current_data:
-            result = f"Name: {data['Name']}\n" \
-                     f"Deadline: {data['Deadline']}\n" \
-                     f"Status: current task\n" \
-                     f"id: {data['id']}\n"
-            bot.send_message(message.chat.id, text=result)
+    bot.send_message(message.chat.id, text='###### LONG RANGE TASKS ######')
+    show_long_tasks(message)
 
-    with open('data/long_range_tasks.json', 'r') as long_file:
-        long_data = json.load(long_file)
-
-        for data in long_data:
-            result = f"Name: {data['Name']}\n" \
-                     f"Deadline: {data['Deadline']}\n" \
-                     f"Status: long range task\n" \
-                     f"id: {data['id']}\n"
-            bot.send_message(message.chat.id, text=result)
 
 
 @bot.message_handler(commands=['delete'])
