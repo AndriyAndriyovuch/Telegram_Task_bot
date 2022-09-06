@@ -155,7 +155,7 @@ def show_long_tasks(message):
 
             result = f"Name: {data['Name']}\n" \
                      f"Deadline: {view_date}\n" \
-                     f"Status: current task\n" \
+                     f"Status: long task\n" \
                      f"id: {data['id']}\n"
             bot.send_message(message.chat.id, text=result)
 
